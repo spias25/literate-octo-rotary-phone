@@ -1,0 +1,28 @@
+provider "aws" { region = var.region }
+
+resource "aws_s3_bucket" "state""{
+  bucket = var.state_bucket_name
+  force_destroy = false
+  tags =  { Project = var.project, Purpose = "Terraform-state" }
+}
+
+resource "aws_s3_bucket_server_side_encryption_configuration" "state" {
+  bucket = aws_s3_bucket.state.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+resouresource "aws_s3_bucket_public_access_block" "state" { 
+    bucket = aws_s3_bucket.state.id
+    block_public_acls = true
+    block_public_policy = true
+    ignore_public_acls = true
+    restrict_public_buckets = true
+}
+
+ouput "state_bucket" {
+  value = aws_s3_bucket.state.bucket.id
+}
