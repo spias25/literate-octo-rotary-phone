@@ -32,5 +32,5 @@ resource "aws_s3_bucket_public_access_block" "state" {
 }
 
 output "state_bucket" {
-  value = aws_s3_bucket.state.bucket.id
+  value = aws_s3_bucket.state.bucket
 }
