@@ -23,6 +23,7 @@ jobs:
     terraform:
         runs-on: ubuntu-latest
         environment: ${{ inputs.environment }}
+        ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
         defaults:
             run:
                 working-directory: ./environments/shared
