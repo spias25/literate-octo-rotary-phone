@@ -1,0 +1,14 @@
+name: Application CI CD
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "services/**"
+      - "heml/**"
+      - ".github/workflows/application.yml"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        
