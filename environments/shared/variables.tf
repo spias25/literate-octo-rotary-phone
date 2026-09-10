@@ -13,4 +13,4 @@ variable "node_desired" { type = number }
 variable "node_max" { type = number }
 variable "github_org" { type = string }
 variable "github_repo" { type = string }
-  
+

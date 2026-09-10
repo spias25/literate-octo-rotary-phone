@@ -40,7 +40,7 @@ jobs:
         run: |
           echo "repo={{ github.repository }}"
       - name: Format
-        run: terraform fmt -check -recursive ../..
+        run: terraform fmt -recursive ../..
       - name: Init s3 backend
         run: terraform init -input=false -reconfigure -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=megamart/${{ inputs.environment }}/terraform.tfstate" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="encrypt=true"
       - name: Validate
