@@ -9,7 +9,7 @@ module "network" {
   azs            = var.azs
   private_subnet = var.private_subnet
   public_subnet  = var.public_subnet
-  tags           = local.tags
+  # tags           = local.tags
 }
 module "eks" {
   source             = "../../modules/eks"
@@ -21,7 +21,7 @@ module "eks" {
   min_size           = var.node_min
   desired_size       = var.node_desired
   max_size           = var.node_max
-  tags               = local.tags
+  $ tags               = local.tags
 }
 module "ecr" {
   source       = "../../modules/ecr"
