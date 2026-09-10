@@ -1,5 +1,4 @@
 name: Application CI CD
-
 on:
   push:
     branches: [main]
@@ -7,8 +6,112 @@ on:
       - "services/**"
       - "heml/**"
       - ".github/workflows/application.yml"
+    
   workflow_dispatch:
-    inputs:
-      environment:
+      inputs:
+       environment:
         description: Target environment
+        required: true
+        type: choice
+        options: [dev, qa, prod]
+        default: dev
+  
+permissions:
+      id-token: write
+      contents: write
+jobs:
+  build-scan-push:
+    runs-on: ubuntu-lates
+    environment: ${{inputs.environment || 'dev'}}
+    strategy:
+      fail-fast: false
+      matrix:
+       service: [catalog-service, order-service]
+      
+    steps:
+      - name: Checkout
+        uses: actions/checkout@4
+
+      - name: Configure ASW credentials using OIDC
+        uses: aws-actions/configure-aws-credentials@4
+        with:
+         role-to-assue: ${{ vars.AWS_ROLE_ARN}}
+         aws-region: ${{ vars.AWS_REGION}}
+
+      - name: login to Amazon ECR
+        id: ecr
+        uses: aws-action/amazon-ecr-login@v2
+
+      - name: Set image details
+        id: image
+        shell: bash
+        run: |
+         ENVIRONMENT="${{ inputs.environment || 'dev' }}"
+         REPOSITORY="megamart-${ENVIRONMENT}-${{ matrix.service }}"
+         IMAGe_URI="${{ steps.ecr.output.registry }}"/${REPOSITORY}:${GITHUB_SHA}
+         echo "repository=${REPOSITORY}" >> "$GITHUB_OUTPUT"
+         echo "uri-${IMAGE_URI}" >> "$GITHUB_OUTPUT"
+      
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+         context: services/${{ matrix.service }}
+         load: true
+         tags: ${{ steps.image.output.uri}}
+      
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+         image-ref: ${{ steps.image.outputs.uri }}
+         format: table
+         exit-code: "1"
+         ignore-unifixed: true
+         severity: CRITICAL
+      
+      - name: Pushmage to Amazon ECR
+        run: docker push "${{ steps.image.outputs.uri }}"
+  update-gitops:
+    needs: build-scan-push
+    runs-on: ubuntu-lates
+    environment: ${{ inputs.environment || 'dev'}}
+
+    steps:
+      - name: Checkout
+        uses: action/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+                  
+      - name: Update Helm image tags
+        shell: bash
+        run: |
+          ENVIRONMENT="{{ inputs.environment || 'dev' }}"
+          for SERVICE in catlog-service order-service; do
+           FILE=helm/${SERVICE}/value-${ENVIRONMENT}.yaml
+           if [ -"$FILE" ]; then
+            sed -i "s|^[[:space:]]*tag:.*| tag: "${GITHUB_SHA}"|""$FILE"
+            fi
+          done
+      
+      - name: Commit GITOps change
+        shell: bash
+        run: |
+         if git diff --quit; then
+          echo "NO Helm value changes detected"
+          exit 0
+         fi
+         git config user.name "github-action[bot]"
+         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+         git commit -m "chore(gitops): deploy ${GITHUB_SHA}"
+         git push
+
+
+         
+
+
+        
+        
+
+
+  
+
         

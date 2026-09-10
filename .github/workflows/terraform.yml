@@ -1,55 +1,55 @@
 name: Terraform Multi Environment
 on:
-    pull_request:
-        paths: [
+  pull_request:
+    paths: [
             'modules/**',
             'environments/**',
             '.github/workflows/terraform.yml'
         ]
-    workflow_dispatch:
-        inputs:
-            environment:
-                type: choice
-                options: [dev, qa, prod]
-                required: true
-            action:
-                type: choice
-                options: [plan, apply, destroy]
-                required: true
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [dev, qa, prod]
+        required: true
+      action:
+        type: choice
+        options: [plan, apply, destroy]
+        required: true
 permissions:
-    id-token: write
-    contents: read
+  id-token: write
+  contents: read
 jobs:
-    terraform:
-        runs-on: ubuntu-latest
-        environment: ${{ inputs.environment }}
-        # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
-        defaults:
-            run:
-                working-directory: ./environments/shared
-        steps:
-            - uses: actions/checkout@v4
-            - uses: hashicorp/setup-terraform@v3
-              with: {terraform_version: 1.13.0}
-            - uses: aws-actions/configure-aws-credentials@v4
-              with:
-                role-to-assume: ${{ vars.AWS_ROLE_ARN}}
-                aws-region: ${{ vars.AWS.REGION}}
-            - name: Format
-              run: terraform fmt -check -recursive ../..
-            - name: Init s3 backend
-              run: terraform init -input=false -reconfigure -backen-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=megamart/${{ inputs.environment }}/terrafrom.tfstate" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="encrypt=true"
-            - name: Validate
-              run: terraform validate
-            - name: Plan
-              if: inputs.action != 'destory'
-              run: terraform plan -input=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=tfplan
-            - name: Apply
-              if: inputs.action == 'apply'
-              run: terraform apply -inpute=false -autoapprove tfplan
-            - name: Destory plan
-              if: inputs.action =='destroy'
-              run: terrafrom plan -destory -inpute=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=destroy.plan
-            - name: Destroy apply
-              if: inputs.action == 'destroy'
-              run: terraform apply -input=false -auto-approve destroy.tfplan
+  terraform:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+     # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
+    defaults:
+      run:
+        working-directory: ./environments/shared
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with: {terraform_version: 1.13.0}
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN}}
+          aws-region: ${{ vars.AWS.REGION}}
+      - name: Format
+        run: terraform fmt -check -recursive ../..
+      - name: Init s3 backend
+        run: terraform init -input=false -reconfigure -backen-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=megamart/${{ inputs.environment }}/terrafrom.tfstate" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="encrypt=true"
+      - name: Validate
+        run: terraform validate
+      - name: Plan
+        if: inputs.action != 'destory'
+        run: terraform plan -input=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=tfplan
+      - name: Apply
+        if: inputs.action == 'apply'
+        run: terraform apply -inpute=false -autoapprove tfplan
+      - name: Destory plan
+        if: inputs.action =='destroy'
+        run: terrafrom plan -destory -inpute=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=destroy.plan
+      - name: Destroy apply
+        if: inputs.action == 'destroy'
+        run: terraform apply -input=false -auto-approve destroy.tfplan
