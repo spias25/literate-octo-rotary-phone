@@ -17,8 +17,8 @@ module "eks" {
             max_size = var.node_max_size
             capacity_type = "ON_DEMAND"
             tags = {
-                k8s.io/cluster-autoscaler/enabled = "true"
-                k8s.io/cluster-autoscaler/${var.cluster_name} = "owned"
+                "k8s.io/cluster-autoscaler/enabled" = "true"
+                "k8s.io/cluster-autoscaler/${var.cluster_name}" = "owned"
             }
         }
     }

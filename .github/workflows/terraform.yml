@@ -42,7 +42,7 @@ jobs:
       - name: Format
         run: terraform fmt -check -recursive ../..
       - name: Init s3 backend
-        run: terraform init -input=false -reconfigure -backen-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=megamart/${{ inputs.environment }}/terrafrom.tfstate" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="encrypt=true"
+        run: terraform init -input=false -reconfigure -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" -backend-config="key=megamart/${{ inputs.environment }}/terraform.tfstate" -backend-config="region=${{ vars.AWS_REGION }}" -backend-config="encrypt=true"
       - name: Validate
         run: terraform validate
       - name: Plan
@@ -53,7 +53,7 @@ jobs:
         run: terraform apply -inpute=false -autoapprove tfplan
       - name: Destory plan
         if: inputs.action =='destroy'
-        run: terrafrom plan -destory -inpute=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=destroy.plan
+        run: terraform plan -destory -inpute=false -car-file=../${{ inputs.environment }}/${{ inputs.environment }}.tfvars -out=destroy.plan
       - name: Destroy apply
         if: inputs.action == 'destroy'
         run: terraform apply -input=false -auto-approve destroy.tfplan
