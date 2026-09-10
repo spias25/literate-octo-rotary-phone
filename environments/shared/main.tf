@@ -21,17 +21,17 @@ module "eks" {
   min_size           = var.node_min
   desired_size       = var.node_desired
   max_size           = var.node_max
-  $ tags               = local.tags
+  tags               = local.tags
 }
 module "ecr" {
   source       = "../../modules/ecr"
   repositories = ["${local.name}-catalog-service", "${local.name}-order-service"]
-  # tags         = local.tags
+  tags         = local.tags
 }
 module "data" {
   source      = "../../modules/data"
   table_names = "${local.name}-orders"
-  # tags        = local.tags
+  tags        = local.tags
 }
 module "order_irsa" {
   source               = "../../modules/irsa"
@@ -41,7 +41,7 @@ module "order_irsa" {
   namespace            = "megamart"
   service_account_name = "order-service"
   table_arn            = module.data.table_arn
-  # tags                 = local.tags
+  tags                 = local.tags
 }
 /*
 module "github_oidc" {
@@ -50,7 +50,7 @@ module "github_oidc" {
   github_org          = var.github_org
   github_repo         = var.github_repo
   ecr_repository_arns = values(module.ecr.repository_arns)
-  # tags                = locals.tags
+  # tags                = local.tags
 }
 */
 module "addons" {
