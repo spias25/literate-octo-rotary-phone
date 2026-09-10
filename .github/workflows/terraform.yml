@@ -23,7 +23,6 @@ jobs:
   terraform:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
-     # ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true
     defaults:
       run:
         working-directory: ./environments/shared
@@ -35,6 +34,9 @@ jobs:
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN}}
           aws-region: ${{ vars.AWS_REGION}}
+      - name: Debug
+        run: |
+          echo "repo={{ github.repository }}"
       - name: Format
         run: terraform fmt -check -recursive ../..
       - name: Init s3 backend
