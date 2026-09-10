@@ -34,7 +34,8 @@ jobs:
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ vars.AWS_ROLE_ARN}}
-          aws-region: ${{ vars.AWS.REGION}}
+          aws-region: us-east-1
+          # aws-region: ${{ vars.AWS.REGION}}
       - name: Format
         run: terraform fmt -check -recursive ../..
       - name: Init s3 backend
