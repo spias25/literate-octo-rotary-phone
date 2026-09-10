@@ -43,6 +43,7 @@ module "order_irsa" {
   table_arn            = module.data.table_arn
   tags                 = local.tags
 }
+/*
 module "github_oidc" {
   source              = "../../modules/github_oidc"
   name                = "${local.name}-github-actions"
@@ -51,6 +52,7 @@ module "github_oidc" {
   ecr_repository_arns = values(module.ecr.repository_arns)
   tags                = locals.tags
 }
+*/
 module "addons" {
   source            = "../../modules/addons"
   cluster_name      = module.eks.cluster_name
