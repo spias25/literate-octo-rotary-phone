@@ -30,7 +30,7 @@ module "ecr" {
 }
 module "data" {
   source      = "../../modules/data"
-  table_names = ["${local.name}-orders"]
+  table_names = "${local.name}-orders"
   tags        = local.tags
 }
 module "order_irsa" {
